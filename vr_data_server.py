@@ -11,6 +11,22 @@ import easygui
 import VrClient
 import triad_openvr
 
+def remap_coordinates(coordinates):
+    x = coordinates[0]
+    y = coordinates[1]
+    z = coordinates[2]
+    rot1 = coordinates[3]
+    rot2 = coordinates[4]
+    rot3 = coordinates[5]
+    new_x = z
+    new_y = x
+    new_z = y
+    new_yaw = -rot2
+    new_pitch = (-rot3) + 90
+    new_roll = -rot1
+    return new_x, new_y, new_z, new_yaw, new_pitch, new_roll
+
+
 
 # class StdoutRedirector:
 #     def __init__(self, text_widget):
@@ -80,6 +96,7 @@ class VirtualRealityServer:
             data = self.receive(connection)
             if 'cds' in data:
                 coordinates = self.vr.get_data()
+                coordinates = remap_coordinates(coordinates)
                 self.send(coordinates, connection)
                 print(time.asctime(), 'Connection', str(n), 'Data:', coordinates)
 

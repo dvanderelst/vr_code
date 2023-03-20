@@ -3,8 +3,6 @@ import logging
 import sys
 import time
 
-
-
 class Client:
     def __init__(self, ip):
         # create logger with
@@ -21,7 +19,7 @@ class Client:
         self.file_logger.setFormatter(formatter)
         self.console_logger.setFormatter(formatter)
         # add the handlers to the logger
-        self.logger.addHandler(self.file_logger)
+        #self.logger.addHandler(self.file_logger)
         self.logger.addHandler(self.console_logger)
 
         self.break_character = '*'
@@ -31,9 +29,11 @@ class Client:
         self.buffer = 1024
 
     def connect(self):
+        self.logger.info('Connecting')
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_address = (self.remote, self.port)
         self.socket.connect(server_address)
+        self.logger.info('Connected')
 
     def send(self, msg):
         msg = msg.rstrip(self.break_character)
@@ -56,7 +56,6 @@ class Client:
     def get_coordinates(self, to_list=True):
         coordinates = []
         data = self.send('cds')
-        print(data)
         data = data.rstrip(' ')
         if not to_list: return data
         for x in range(10): data = data.replace('  ', ' ')
@@ -77,7 +76,7 @@ class Client:
 
 
 if __name__ == "__main__":
-    c = Client('192.168.0.173')
+    c = Client('192.168.1.6')
     c.connect()
     while 1:
         received = c.get_coordinates()
