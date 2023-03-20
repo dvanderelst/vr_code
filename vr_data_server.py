@@ -13,14 +13,16 @@ import triad_openvr
 
 def str2list(txt):
     lst = []
-    parts = txt.split(' ')
+    txt = txt.rstrip(' ')
+    parts = txt.split('  ')
+    print(parts)
     for x in parts: lst.append(float(x))
     return lst
 
-def str2list(lst):
+def list2str(lst):
     txt = ''
-    for x in lst: txt += str(x) + ' '
-    txt = txt.rstrip(' ')
+    for x in lst: txt += str(x) + '  '
+    #txt = txt.rstrip(' ')
     return txt
 
 def remap_coordinates(coordinates):
@@ -108,9 +110,11 @@ class VirtualRealityServer:
             data = self.receive(connection)
             if 'cds' in data:
                 coordinates = self.vr.get_data()
+                print(coordinates)
                 coordinates = str2list(coordinates)
                 coordinates = remap_coordinates(coordinates)
-                coordinates = str2list(coordinates)
+                coordinates = list2str(coordinates)
+                print(coordinates)
                 self.send(coordinates, connection)
                 print(time.asctime(), 'Connection', str(n), 'Data:', coordinates)
 
