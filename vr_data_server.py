@@ -11,6 +11,18 @@ import easygui
 import VrClient
 import triad_openvr
 
+def str2list(txt):
+    lst = []
+    parts = txt.split(' ')
+    for x in parts: lst.append(float(x))
+    return lst
+
+def str2list(lst):
+    txt = ''
+    for x in lst: txt += str(x) + ' '
+    txt = txt.rstrip(' ')
+    return txt
+
 def remap_coordinates(coordinates):
     x = coordinates[0]
     y = coordinates[1]
@@ -96,7 +108,9 @@ class VirtualRealityServer:
             data = self.receive(connection)
             if 'cds' in data:
                 coordinates = self.vr.get_data()
+                coordinates = str2list(coordinates)
                 coordinates = remap_coordinates(coordinates)
+                coordinates = str2list(coordinates)
                 self.send(coordinates, connection)
                 print(time.asctime(), 'Connection', str(n), 'Data:', coordinates)
 
