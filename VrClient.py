@@ -44,16 +44,22 @@ class Client:
 
     def receive(self):
         data = ''
+        counter = 0
+        self.logger.info('Receiving')
         while 1:
             packet = self.socket.recv(self.buffer)
+            print('packet', packet)
             if not packet: break
             data += packet.decode()
             data = data.rstrip('\n')
             if data.endswith(self.break_character): break
+            if counter%1000==0: print('.', end='')
+            counter = counter + 1
         data = data.rstrip(self.break_character + '\n')
         return data
 
     def get_coordinates(self, to_list=True):
+        self.logger.info('Getting coordinates')
         coordinates = []
         data = self.send('cds')
         data = data.rstrip(' ')
@@ -69,10 +75,8 @@ class Client:
         return coordinates
 
     def disconnect(self):
+        self.send('close')
         self.socket.close()
-
-    def __del__(self):
-        self.disconnect()
 
 
 if __name__ == "__main__":
