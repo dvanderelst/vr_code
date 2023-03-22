@@ -7,6 +7,7 @@ from tkinter import S, N, W, E, END
 from os.path import expanduser
 
 import easygui
+import traceback
 
 import VrClient
 import triad_openvr
@@ -39,8 +40,6 @@ def remap_coordinates(coordinates):
     new_pitch = (-rot3) + 90
     new_roll = -rot1
     return new_x, new_y, new_z, new_yaw, new_pitch, new_roll
-
-
 
 # class StdoutRedirector:
 #     def __init__(self, text_widget):
@@ -79,8 +78,6 @@ class VirtualRealityServer:
         # '' means accept connections from any device
         self.socket.bind(('', self.port))
         self.socket.listen(5)
-        self.stop = False
-        self.threads = []
 
     def send(self, data, connection):
         data = data + self.break_character
@@ -88,12 +85,12 @@ class VirtualRealityServer:
 
     def receive(self, connection):
         data = ''
+        counter = 0
         while 1:
             packet = connection.recv(self.buffer)
-            if not packet: break
             data += packet.decode()
-            data = data.rstrip('\n')
             if data.endswith(self.break_character): break
+            counter = counter + 1
         data = data.rstrip(self.break_character + '\n')
         return data
 
@@ -101,30 +98,38 @@ class VirtualRealityServer:
         self.stop = True
         self.socket.close()
 
-    def connect_and_serve(self, n):
+    def connect_and_serve(self, connection_id):
         # Wait for connection with blocking call
         connection, address = self.socket.accept()
-        print('Connection', n, 'connected with ' + address[0] + ':' + str(address[1]))
         while 1:
-            if self.stop: break
+            print('Listening on connection', connection_id, 'connected with ' + address[0] + ':' + str(address[1]))
             data = self.receive(connection)
+            print('Connection', connection_id, 'data received:', data)
+            
             if 'cds' in data:
                 coordinates = self.vr.get_data()
-                print(coordinates)
                 coordinates = str2list(coordinates)
                 coordinates = remap_coordinates(coordinates)
                 coordinates = list2str(coordinates)
-                print(coordinates)
                 self.send(coordinates, connection)
-                print(time.asctime(), 'Connection', str(n), 'Data:', coordinates)
+                print(time.asctime(), 'Connection', str(connection_id), 'Data sent')
+            
+            if 'close' in data:
+                print('Closing connection', connection_id)
+                connection.close()
+                self.start_single_thread(connection_id)
+                print('Opened connection', connection_id)
+                return
+            
+    def start_single_thread(self, connection_id):
+        t = threading.Thread(target=self.connect_and_serve, args=[connection_id])
+        t.daemon = True
+        t.start()
 
     def start(self):
-        for x in range(10):
+        for x in range(5):
             time.sleep(0.1)
-            t = threading.Thread(target=self.connect_and_serve, args=[x])
-            t.daemon = True
-            t.start()
-            self.threads.append(t)
+            self.start_single_thread(x)
         print('Opened', x + 1, 'Connections. Waiting.')
 
 
