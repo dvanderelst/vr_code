@@ -48,7 +48,6 @@ class Client:
         self.logger.info('Receiving')
         while 1:
             packet = self.socket.recv(self.buffer)
-            print('packet', packet)
             if not packet: break
             data += packet.decode()
             data = data.rstrip('\n')

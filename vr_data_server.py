@@ -85,12 +85,16 @@ class VirtualRealityServer:
 
     def receive(self, connection):
         data = ''
+        start_time = time.time()
         counter = 0
         while 1:
             packet = connection.recv(self.buffer)
             data += packet.decode()
             if data.endswith(self.break_character): break
             counter = counter + 1
+            current_time = time.time()
+            wait_time = current_time - wait_time
+            if wait_time > 300:  data = 'timeout' + self.break_character
         data = data.rstrip(self.break_character + '\n')
         return data
 
@@ -113,7 +117,11 @@ class VirtualRealityServer:
                 coordinates = list2str(coordinates)
                 self.send(coordinates, connection)
                 print(time.asctime(), 'Connection', str(connection_id), 'Data sent')
-            
+
+            if 'timeout' in data:
+                print('Connection time out', connection_id)
+                data = 'close'
+
             if 'close' in data:
                 print('Closing connection', connection_id)
                 connection.close()
