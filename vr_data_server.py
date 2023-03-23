@@ -93,7 +93,7 @@ class VirtualRealityServer:
             if data.endswith(self.break_character): break
             counter = counter + 1
             current_time = time.time()
-            wait_time = current_time - wait_time
+            wait_time = current_time - start_time
             if wait_time > 300:  data = 'timeout' + self.break_character
         data = data.rstrip(self.break_character + '\n')
         return data

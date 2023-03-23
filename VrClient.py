@@ -45,7 +45,7 @@ class Client:
     def receive(self):
         data = ''
         counter = 0
-        self.logger.info('Receiving')
+        #self.logger.info('Receiving')
         while 1:
             packet = self.socket.recv(self.buffer)
             if not packet: break
