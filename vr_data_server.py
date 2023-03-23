@@ -88,8 +88,12 @@ class VirtualRealityServer:
         start_time = time.time()
         counter = 0
         while 1:
-            packet = connection.recv(self.buffer)
-            data += packet.decode()
+            try:
+                packet = connection.recv(self.buffer)
+                data += packet.decode()
+            except BlockingIOError:
+                # if no data is available (might use this in the future)
+                counter = counter + 1
             if data.endswith(self.break_character): break
             counter = counter + 1
             current_time = time.time()
@@ -105,6 +109,7 @@ class VirtualRealityServer:
     def connect_and_serve(self, connection_id):
         # Wait for connection with blocking call
         connection, address = self.socket.accept()
+        connection.setblocking(0)
         while 1:
             print('Listening on connection', connection_id, 'connected with ' + address[0] + ':' + str(address[1]))
             data = self.receive(connection)
